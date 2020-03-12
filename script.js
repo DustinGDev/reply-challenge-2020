@@ -16,6 +16,8 @@ const developerNumber = Number(rawFileArray.shift());
 
 const developers = [];
 
+const companyWorkers = {}
+
 for (let index = 0; index < developerNumber; index++) {
     const devArray  = rawFileArray.shift().split(' ');
 
@@ -23,8 +25,11 @@ for (let index = 0; index < developerNumber; index++) {
         company: devArray.shift(),
         bonus: devArray.shift(),
         skillCount: devArray.shift(),
-        skills: devArray
+        skills: devArray,
+        index
     }
+
+    companyWorkers[developer.company] ? companyWorkers[developer.company]++ : companyWorkers[developer.company] = 0;
 
     developers.push(developer);
 }
@@ -38,7 +43,8 @@ for (let index = 0; index < managerNumber; index++) {
 
     const manager = {
         company: managerArray.shift(),
-        bonus: managerArray.shift()
+        bonus: managerArray.shift(), 
+        index
     }
 
     managers.push(manager);
@@ -120,35 +126,45 @@ places.sort((a, b) => {
     return a.adjacentDesks - b.adjacentDesks;
 })
 
+// TODO: order manages and developers by bonusfactor (same company vs skills)
+
+const setPlaces = {};
+
 
 for(let place of places) {
 
     const thisPlace = place
 
-    console.log('thisPlace', thisPlace)
-    
-    for(let desk of place.places) {
+    if(!setPlaces[thisPlace.key]) {
 
-        console.log('desk', desk)
-
-        switch(desk.type) {
+        switch(thisPlace.type) {
             case 'M':
-            
-                // this is a desk for a manager
-                // which one should sit here ?
-
-                console.log('this is a desk for a manager, which one should sit here ?')
-
+                thisPlace.person = managers.shift()
                 break;
-            
             case '_':
-                
-                // this is a desk for a developer
-                // which one should sit here ?
-                
+                thisPlace.person = developers.shift()
                 break;
+        }
+
+        setPlaces[thisPlace.key] = thisPlace.person;
+        
+        for(let neighbourPlace of place.places) {
+            
+            switch(neighbourPlace.type) {
+                case 'M':
+                    neighbourPlace.person = managers.shift()
+                    break;
+                case '_':
+                    neighbourPlace.person = developers.shift()
+                    break;
+            }
+            
+            setPlaces[neighbourPlace.key] = neighbourPlace.person
+
         }
 
     }
 
 }
+
+console.log(setPlaces)
