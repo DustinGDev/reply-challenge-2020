@@ -29,7 +29,7 @@ for (let index = 0; index < developerNumber; index++) {
         index
     }
 
-    companyWorkers[developer.company] ? companyWorkers[developer.company]++ : companyWorkers[developer.company] = 0;
+    companyWorkers[developer.company] ? companyWorkers[developer.company]++ : companyWorkers[developer.company] = 1;
 
     developers.push(developer);
 }
@@ -126,7 +126,26 @@ places.sort((a, b) => {
     return a.adjacentDesks - b.adjacentDesks;
 })
 
+
+
+
+
+
+for(let developer of developers) {
+    developer.companions = companyWorkers[developer.company];
+}
+for(let manager of managers) {
+    manager.companions = companyWorkers[manager.company];
+}
+
+developers.sort((a, b) => {
+    return b.companions - a.companions || b.company.localeCompare(a.company);
+})
 // TODO: order manages and developers by bonusfactor (same company vs skills)
+
+console.log('###', developers);
+
+
 
 const setPlaces = {};
 
@@ -165,6 +184,16 @@ for(let place of places) {
 
     }
 
+}
+
+function calcWorker(place) {
+    const workers = [];
+
+    for (let subPlace of place.places) {
+
+    }
+    if (place.places.length >= 3) {
+    }
 }
 
 console.log(setPlaces)
