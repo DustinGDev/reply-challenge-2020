@@ -133,9 +133,11 @@ for(let place of places) {
 
         switch(desk.type) {
             case 'M':
-                
+            
                 // this is a desk for a manager
                 // which one should sit here ?
+
+                console.log('this is a desk for a manager, which one should sit here ?')
 
                 break;
             
