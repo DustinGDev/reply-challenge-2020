@@ -1,5 +1,5 @@
 const fs = require('fs')
-const file = 'a_solar.txt';
+const file = 'b_dream.txt';
 const rawFile = fs.readFileSync(file, 'utf8');
 
 const rawFileArray = rawFile.split('\n');
@@ -169,16 +169,18 @@ for(let place of places) {
         
         for(let neighbourPlace of place.places) {
             
-            switch(neighbourPlace.type) {
-                case 'M':
-                    neighbourPlace.person = managers.shift()
-                    break;
-                case '_':
-                    neighbourPlace.person = developers.shift()
-                    break;
+            if (!neighbourPlace.person) {
+                switch(neighbourPlace.type) {
+                    case 'M':
+                        neighbourPlace.person = managers.shift()
+                        break;
+                    case '_':
+                        neighbourPlace.person = developers.shift()
+                        break;
+                }
+                
+                setPlaces[neighbourPlace.key] = neighbourPlace.person
             }
-            
-            setPlaces[neighbourPlace.key] = neighbourPlace.person
 
         }
 
