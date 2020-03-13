@@ -1,5 +1,5 @@
 const fs = require('fs')
-const file = 'b_dream.txt';
+const file = 'f_glitch.txt';
 const rawFile = fs.readFileSync(file, 'utf8');
 
 const rawFileArray = rawFile.split('\n');
@@ -59,7 +59,7 @@ for (let index =  0; index < map.length; index++) {
     for (let idx = 0; idx < row.length; idx++) {
         const cell = row[idx];
         if(cell !== '#') {
-            const objectKey = `${index}${idx}`;
+            const objectKey = `${index}:::${idx}`;
 
             const placeObject = {
                 type: cell,
@@ -73,7 +73,7 @@ for (let index =  0; index < map.length; index++) {
                 if (above !== '#') {
                     const belowObject = {
                         type: above,
-                        key: `${index-1}${idx}`
+                        key: `${index-1}:::${idx}`
                     }
                     placeObject.places.push(belowObject);
                 }
@@ -85,7 +85,7 @@ for (let index =  0; index < map.length; index++) {
                 if (left !== '#') {
                     const belowObject = {
                         type: left,
-                        key: `${index}${idx-1}`
+                        key: `${index}:::${idx-1}`
                     }
                     placeObject.places.push(belowObject);
                 }
@@ -96,7 +96,7 @@ for (let index =  0; index < map.length; index++) {
                 if (below !== '#') {
                     const belowObject = {
                         type: below,
-                        key: `${index+1}${idx}`
+                        key: `${index+1}:::${idx}`
                     }
                     placeObject.places.push(belowObject);
                 }
@@ -108,7 +108,7 @@ for (let index =  0; index < map.length; index++) {
                 if (right && right !== '#') {
                     const belowObject = {
                         type: right,
-                        key: `${index}${idx+1}`
+                        key: `${index}:::${idx+1}`
                     }
                     placeObject.places.push(belowObject);
                 }
@@ -143,7 +143,7 @@ developers.sort((a, b) => {
 })
 // TODO: order manages and developers by bonusfactor (same company vs skills)
 
-console.log('###', developers);
+//console.log('###', developers);
 
 
 
@@ -155,31 +155,44 @@ for(let place of places) {
     const thisPlace = place
 
     if(!setPlaces[thisPlace.key]) {
-
+        let thisPlaccePerson;
         switch(thisPlace.type) {
             case 'M':
-                thisPlace.person = managers.shift()
+                thisPlaccePerson = managers.shift()
                 break;
             case '_':
-                thisPlace.person = developers.shift()
+                thisPlaccePerson = developers.shift()
                 break;
         }
-
-        setPlaces[thisPlace.key] = thisPlace.person;
+        if (thisPlaccePerson) {
+            thisPlace.person = thisPlaccePerson;
+            if(thisPlace.type !== thisPlace.person.type){
+                console.warn(thisPlace)
+            }
+            setPlaces[thisPlace.key] = thisPlace.person;
+        }
         
         for(let neighbourPlace of place.places) {
             
-            if (!neighbourPlace.person) {
+            if(!neighbourPlace.person && thisPlaccePerson){
+
+                let person;
                 switch(neighbourPlace.type) {
                     case 'M':
-                        neighbourPlace.person = managers.shift()
+                        person = managers.shift()
                         break;
                     case '_':
-                        neighbourPlace.person = developers.shift()
+                        person = developers.shift()
                         break;
                 }
-                
-                setPlaces[neighbourPlace.key] = neighbourPlace.person
+
+                if (person) {
+                    neighbourPlace.person = person;
+                    if(neighbourPlace.type !== neighbourPlace.person.type){
+                        console.warn(neighbourPlace)
+                    }
+                    setPlaces[neighbourPlace.key] = neighbourPlace.person
+                }
             }
 
         }
@@ -198,4 +211,47 @@ function calcWorker(place) {
     }
 }
 
-console.log(setPlaces)
+//console.log(setPlaces)
+
+// sorting and returning output
+//console.log(setPlaces)
+const replyrs = []
+for (const plcment in setPlaces) {
+    if (setPlaces.hasOwnProperty(plcment)) {        
+        const element = Object.assign({},setPlaces[plcment], {placement:plcment});
+        replyrs.push(element)
+        
+    }
+}
+
+// TODO: Sort by Type, Developers first, Managers last
+
+const response = [];
+const replyerPlacements = (replyers) => {
+    const developers = [], managers = [];
+    replyers.forEach(rep => {
+        rep.skillCount || rep.skillCount === 0 ? developers.push(rep) : managers.push(rep); 
+    })
+
+    developers.sort((a, b) => (a.index > b.index) ? 1 : -1)
+    managers.sort((a, b) => (a.index > b.index) ? 1 : -1)
+
+    managers.forEach(manager => manager.index += (developerNumber - 1))
+    
+    replyers = [...developers, ...managers];
+
+    replyers.sort((a, b) => (a.index > b.index) ? 1 : -1)
+    const sortedReplyers = replyers;
+
+    for (let index = 0; index < (developerNumber + managerNumber); index++) {
+        if (sortedReplyers[0] && sortedReplyers[0].index === index) {
+            const replyer = sortedReplyers.shift();            
+            response.push(replyer.placement.split(':::').reverse().join(' '))
+        } else {
+            response.push('X')
+        }
+    }
+}
+replyerPlacements(replyrs)
+
+fs.writeFileSync('answer-'+file, response.join('\n'))
